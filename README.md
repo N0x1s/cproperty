@@ -1,7 +1,7 @@
 # cached_properties!
 [![Python 3.7.1](https://img.shields.io/badge/Python-3.7.1-green.svg)](http://www.python.org/download/)
 
-A  class/method decorator for caching properties
+A  class/method decorator for caching properties support global cache, (time, hits) control
 
 what cached_properties do for you?
 ----
