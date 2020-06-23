@@ -193,7 +193,7 @@ class Worker:
 ```
 > **Note:** You can combine all arguments **(general, hits, timeout)**
 ## Todo
-I will try to maintain this respiratory and update or add new things to it you are welcome to contribute `:relaxed:`
+I will try to maintain this respiratory and update or add new things to it you are welcome to contribute :relaxed:
 
 Here some of the following features:
 
