@@ -14,7 +14,7 @@ class Property(object):
 	def __set__(self, instance, value):
 		self.storage = self.__dict__ if self.general else instance.__dict__
 		if self._var in self.storage:
-			storage.__dict__[self._var]['value'] = value
+			self.storage.__dict__[self._var]['value'] = value
 		else:
 			self._update_copy({
 				'value': value,
