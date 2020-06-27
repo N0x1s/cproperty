@@ -14,7 +14,7 @@ class Property(object):
 	def __set__(self, instance, value):
 		self.storage = self.__dict__ if self.general else instance.__dict__
 		if self._var in self.storage:
-			self.storage.__dict__[self._var]['value'] = value
+			self.storage[self._var]['value'] = value
 		else:
 			self._update_copy({
 				'value': value,
@@ -34,7 +34,7 @@ class Property(object):
 
 	def __delete__(self, instance):
 		self.storage = self.__dict__ if self.general else instance.__dict__
-		storage.pop(self._var, None)
+		self.storage.pop(self._var, None)
 
 	def _setup_method(self, method):
 		self.method = method
