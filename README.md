@@ -18,7 +18,7 @@ pip install cached_properties
 ```bash
 git clone https://github.com/n0x1s/cached_properties
 cd cached_properties
-python setup.py install
+pip install -e .
 ```
 ## How to use
 
