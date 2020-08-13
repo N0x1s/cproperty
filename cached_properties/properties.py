@@ -6,7 +6,7 @@ __all__ = ['Property']
 class Property(object):
     def __init__(self, method=None, *, general=None, timeout=None, hits=None):
         self.general = general
-        self.timeout = timeout + 1
+        self.timeout = timeout
         self.hits = hits
         if method is not None:
             self._setup_method(method)
@@ -56,7 +56,6 @@ class Property(object):
                 'value': self.method(instance),
                 'timeout': (time(), self.timeout)})
         if self.hits:
-            self.storage[self._var]['hits'] -= 1
             if self.storage[self._var]['hits'] == 0:
                 # make sure we don't change the old time when checking hits
                 settime = self.storage[self._var]['timeout'][0]
@@ -64,6 +63,8 @@ class Property(object):
                     'value': self.method(instance),
                     'timeout': (settime, self.timeout),
                     'hits': self.hits})
+            self.storage[self._var]['hits'] -= 1
+
         if self.timeout:
             settime, timeout = self.storage[self._var]['timeout']
             if time() - settime >= timeout:
