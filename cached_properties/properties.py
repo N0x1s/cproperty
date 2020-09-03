@@ -3,15 +3,19 @@ from time import time
 __all__ = ['Property']
 
 
-class Property(object):
-    def __init__(self, method=None, *, general=None, timeout=None, hits=None):
+class Property:
+    def __init__(self, method=None, *, general=None, timeout=None, hits=None,
+                 validator=None):
         self.general = general
         self.timeout = timeout
         self.hits = hits
+        self.validator = validator
         if method is not None:
             self._setup_method(method)
 
     def __set__(self, instance, value):
+        if self.validator is not None and not self.validator(value):
+            raise ValueError(f'{value} is valid value')
         self.storage = self.__dict__ if self.general else instance.__dict__
         if self._var in self.storage:
             self.storage[self._var]['value'] = value
