@@ -15,7 +15,7 @@ class Property:
 
     def __set__(self, instance, value):
         if self.validator is not None and not self.validator(value):
-            raise ValueError(f'{value} is valid value')
+            raise ValueError(f'{value} is not a valid value')
         self.storage = self.__dict__ if self.general else instance.__dict__
         if self._var in self.storage:
             self.storage[self._var]['value'] = value
