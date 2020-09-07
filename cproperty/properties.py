@@ -1,7 +1,7 @@
 import inspect
 from time import time
 
-__all__ = ['cproperty', 'classdecorator', 'Property']
+__all__ = ['cproperty', 'classdecorator']
 
 
 class cproperty:
@@ -17,7 +17,7 @@ class cproperty:
     def __set__(self, instance, value):
         if self.validator is not None and not self.validator(value):
             raise ValueError(f'{value} is not a valid value')
-        self.storage = self.__dict__ if self.general else instance.__dict__
+        self._initialed_storage(instance)
         if self._var in self.storage:
             self.storage[self._var]['value'] = value
         else:
@@ -34,16 +34,20 @@ class cproperty:
         return self
 
     def __get__(self, instance, cls):
-        self.storage = self.__dict__ if self.general else instance.__dict__
+        self._initialed_storage(instance)
         return self._update_storage(instance, cls)
 
     def __delete__(self, instance):
-        self.storage = self.__dict__ if self.general else instance.__dict__
+        self._initialed_storage(instance)
         self.storage.pop(self._var, None)
 
     def _setup_method(self, method):
         self.method = method
         self._var = f'_s_{method.__name__}'
+
+    def _initialed_storage(self, instance):
+        if not hasattr(self, 'storage'):
+            self.storage = self.__dict__ if self.general else instance.__dict__
 
     def _update_copy(self, value):
         const = {
@@ -93,16 +97,9 @@ class classdecorator:
             for name, value in vars(icls).items():
                 if callable(value) and len(
                         list(inspect.signature(value).parameters)) == 1:
-                    setattr(icls, name, Property(value, **self.kwargs))
+                    setattr(icls, name, cproperty(value, **self.kwargs))
         else:
             for method in self.methods:
-                setattr(icls, method, Property(getattr(cls, method),
-                                               **self.kwargs))
+                setattr(icls, method, cproperty(getattr(cls, method),
+                                                **self.kwargs))
         return icls(cls, *args, **kwargs) if self.cls else icls
-
-
-class Property(cproperty):
-    def __init__(self, *args, **kwargs):
-        print('Property will be removed in leter versions \
-please take a look at cproperty instead many thanks')
-        super().__init__(*args, **kwargs)
