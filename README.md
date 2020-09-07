@@ -1,6 +1,6 @@
 
 # cproperty!
-[![Python 3.7.1](https://img.shields.io/badge/Python-3.7.1-green.svg)](http://www.python.org/download/)
+[![Python 3](https://img.shields.io/badge/Python-3-blue.svg)](http://www.python.org/download/)
 
 A  class/method decorator for caching properties support global cache, (time, hits) control
 
