@@ -1,7 +1,7 @@
 import inspect
 from time import time
 
-__all__ = ['cproperty', 'classproperty', 'Property']
+__all__ = ['cproperty', 'classdecorator', 'Property']
 
 
 class cproperty:
