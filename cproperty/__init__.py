@@ -47,18 +47,18 @@ class cproperty:
     def _compute_value(self, instance):
         return self.method(instance)
 
-    # @thread_safe
+    @thread_safe
     @check_storage
     def __get__(self, instance, owner):
         return self.storage['value']
 
-    # @thread_safe
+    @thread_safe
     @check_storage
     def __set__(self, instance, value):
 
         self.storage['value'] = value
 
-    # @thread_safe
+    @thread_safe
     @check_storage
     def __delete__(self, instance):
         del self.storage
