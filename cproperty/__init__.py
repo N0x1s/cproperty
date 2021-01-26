@@ -31,11 +31,11 @@ class cproperty:
                                     for name in _fields])
 
     def __init__(self, method=None, /, *args, **kwargs):
-
+        """
         for name, value in zip_longest(self._fields, self._sig.bind_partial(
                             *args, **kwargs).arguments.values()):
             setattr(self, name, value)
-
+        """
         for name, value in self._sig.bind_partial(*args, **kwargs).arguments.items():
             setattr(self, name, value)
 
@@ -73,7 +73,7 @@ class cproperty:
     @check_storage
     def __get__(self, instance, owner):
         return self.storage[self.cache_key]['value']
-        
+
 
     @thread_safe
     @check_storage
