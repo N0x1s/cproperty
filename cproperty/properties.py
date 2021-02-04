@@ -103,3 +103,12 @@ class classdecorator:
                 setattr(icls, method, cproperty(getattr(cls, method),
                                                 **self.kwargs))
         return icls(cls, *args, **kwargs) if self.cls else icls
+
+
+# add on disk cache
+# cache functions
+# change name
+# logging
+# FIXME: general storage is always on
+# make property replace property without alias
+# fix cpropery pointing to global always
