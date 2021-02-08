@@ -8,24 +8,25 @@ class Person:
     def __init__(self, name):
         self.name = name
 
-    @cproperty.cproperty
+    @cproperty.cproperty(hits=3)
     def say_hi(self):
         print('computing')
         return f'Hi my name is: {self.name}'
 
-    @cproperty.cproperty
+    @cproperty.cproperty(timeout=43)
     async def async_say_hi_fail(self):
         print('computing')
         return f'Hi my name is: {self.name}'
 
-x = Person('d')
-
+nox_obj = Person('n0x1s')
+ali_obj = Person('Ali')
+x = Person('x')
 async def good():
     for _ in range(2):
-        await x.async_say_hi_fail
-    x.async_say_hi_fail = 'la'
-    del x.async_say_hi_fail
-    return await x.async_say_hi_fail
+        await nox_obj.async_say_hi_fail
+    nox_obj.async_say_hi_fail = 'la'
+    #del nox_obj.async_say_hi_fail
+    return await ali_obj.async_say_hi_fail
 
 
 
