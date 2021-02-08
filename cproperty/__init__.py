@@ -1,3 +1,4 @@
+import time
 import asyncio
 import threading
 from functools import wraps
@@ -5,7 +6,7 @@ from itertools import zip_longest
 from inspect import Signature, Parameter, _empty
 
 class AwaitableValue:
-	__slots__ = ("value",)
+	__slots__ = ("value")
 
 	def __init__(self, value):
 		self.value = value
@@ -63,7 +64,7 @@ class Signature(Signature):
 
 
 class cproperty:
-	_fields = ('general', 'timeout', 'hits', 'validator', 'value')
+	_fields = ('general', 'timeout', 'hits', 'validator', 'value', 'cachetime')
 	_sig = Signature([Parameter(name, Parameter.POSITIONAL_OR_KEYWORD)
 									for name in _fields])
 
@@ -71,6 +72,8 @@ class cproperty:
 		for name, value in self._sig.bind_with_defaults(*args, **kwargs).arguments.items():
 			setattr(self, name, value)
 
+		if not getattr(self, 'cachetime'): # allow use to add diff cache time
+			setattr(self, 'cachetime', time.time())
 		self.lock = threading.Lock()
 		if method:
 			self._setup_method(method)
@@ -88,7 +91,8 @@ class cproperty:
 
 	def _initialed_storage(self, instance):
 		if not hasattr(self, 'storage'):
-			self.storage = instance.__dict__
+			# self.storage = getattr(self if self.general else instance, '__dict__')
+			self.storage = self.__dict__ if self.general else instance.__dict__
 		if self.cache_key not in self.storage:
 			self.storage[self.cache_key] = {name: value for name, value in self.__dict__.items()
 							if name in self._fields}
@@ -110,19 +114,37 @@ class cproperty:
 			return value
 		return self.storage[self.cache_key]['value'].value
 
-	def invade_cache(self):
-		# self.storage.pop(self.cache_key, None)
-		self.storage[self.cache_key]['value'] = None
-	
+	def _invade_cache(self):
+		# self.storage[self.cache_key].update({field: value if (value := getattr(self, field)) else None
+		#				for field in self._fields})
+		#self.storage[self.cache_key]['value'] = None
+		#self.cachetime = time.time()
+		#self.hits = self.__dict__[self.cache_key]['hits']
+		pass
+
+	@property
+	def _cache_valid(self):
+		if self.timeout:
+			if time.time() - self.cachetime >= self.timeout:
+				self._invade_cache()
+
+		if self.hits is not None:
+			self.hits -= 1
+			if self.hits == 0:
+				self._invade_cache()
+
+
 	@thread_safe
 	@check_storage
 	def __get__(self, instance, owner):
+		print(self.hits)
 		if instance is None:
 			return self
 
-		if self.storage[self.cache_key]['hits']:
-			self.invade_cache()
+		self._cache_valid
 
+		if instance is None:
+			return self
 		return self._compute_value(instance)
 
 	@thread_safe
