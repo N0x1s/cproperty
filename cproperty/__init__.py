@@ -74,6 +74,7 @@ class cproperty:
 
 		if not getattr(self, 'cachetime'): # allow use to add diff cache time
 			setattr(self, 'cachetime', time.time())
+
 		self.lock = threading.Lock()
 		if method:
 			self._setup_method(method)
@@ -115,37 +116,41 @@ class cproperty:
 		return self.storage[self.cache_key]['value'].value
 
 	def _invade_cache(self):
-		# self.storage[self.cache_key].update({field: value if (value := getattr(self, field)) else None
-		#				for field in self._fields})
-		#self.storage[self.cache_key]['value'] = None
-		#self.cachetime = time.time()
-		#self.hits = self.__dict__[self.cache_key]['hits']
-		pass
+		#self.storage[self.cache_key].update({field: value if (value := getattr(self, field)) else None
+		#			for field in self._fields})
+		self.storage[self.cache_key]['value'] = None
+		self.storage[self.cache_key]['cachetime'] = time.time()
+		self.storage[self.cache_key]['hits'] = self.hits # self.__dict__[self.cache_key]['hits']
 
 	@property
-	def _cache_valid(self):
+	def cache_valid(self):
+		#return any([getattr(self, f'_check_{field}')() for field in self._fields
+		#	if getattr(self, field) and hasattr(self, f'_check_{field}')])
+		# return 0
+		if self.hits:
+			return self._check_hits()
 		if self.timeout:
-			if time.time() - self.cachetime >= self.timeout:
-				self._invade_cache()
+			return self._check_timeout()
 
-		if self.hits is not None:
-			self.hits -= 1
-			if self.hits == 0:
-				self._invade_cache()
+		# return False if the cache is expired else return True
+	def _check_hits(self):
+		self.storage[self.cache_key]['hits'] -= 1
+		return self.storage[self.cache_key]['hits'] != 0
+
+	def _check_timeout(self):
+		return time.time() - self.storage[self.cache_key]['cachetime'] <= self.storage[self.cache_key]['timeout']
 
 
 	@thread_safe
 	@check_storage
 	def __get__(self, instance, owner):
-		print(self.hits)
 		if instance is None:
 			return self
+		value = self._compute_value(instance)
+		if not self.cache_valid:
+			self._invade_cache()
 
-		self._cache_valid
-
-		if instance is None:
-			return self
-		return self._compute_value(instance)
+		return value
 
 	@thread_safe
 	@check_storage
