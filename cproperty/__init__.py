@@ -1,5 +1,6 @@
 import time
 import asyncio
+import logging
 import threading
 from functools import wraps
 from itertools import zip_longest
@@ -70,6 +71,8 @@ class cproperty:
 
 	def __init__(self, method=None, /, *args, **kwargs):
 		for name, value in self._sig.bind_with_defaults(*args, **kwargs).arguments.items():
+			logging.info(f'setting {name} to {value}')
+
 			setattr(self, name, value)
 
 		if not getattr(self, 'cachetime'): # allow use to add diff cache time
@@ -161,3 +164,9 @@ class cproperty:
 	@check_storage
 	def __delete__(self, instance):
 		self.storage.pop(self.cache_key, None)
+
+class CacheManager:
+	print(cproperty._fields)
+	__slots__ = cproperty._fields
+	def __init__(self, *args, **kwargs):
+		pass
