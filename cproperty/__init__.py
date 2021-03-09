@@ -1,6 +1,7 @@
 import time
 import asyncio
 import logging
+import inspect
 import threading
 from functools import wraps
 from itertools import zip_longest
@@ -167,6 +168,26 @@ class cproperty:
 	def __delete__(self, instance):
 		self.storage.pop(self.cache_key, None)
 
+class classdecorator:
+	def __init__(self, cls=None, methods=None, auto=False, **kwargs):
+		self.cls = cls
+		self.methods = methods
+		self.auto = auto
+		self.kwargs = kwargs
+
+	def __call__(self, cls=None, *args, **kwargs):
+		icls = self.cls if self.cls else cls
+		if self.auto or not self.methods:
+			for name, value in vars(icls).items():
+				if callable(value) and not isinstance(value, cproperty) and len(
+						list(inspect.signature(value).parameters)) == 1:
+					setattr(icls, name, cproperty(value, **self.kwargs))
+		else:
+			for method in self.methods:
+				setattr(icls, method, cproperty(getattr(cls, method),
+												**self.kwargs))
+		return icls(cls, *args, **kwargs) if self.cls else icls
+
 class CacheManager:
 	__slots__ = cproperty._fields
 	def __init__(self, general, timeout, hits, validator):
@@ -182,8 +203,14 @@ class CacheManager:
 # change name
 # logging
 # make property replace property without alias
-# fix cpropery pointing to global always
 
-# added general, timeout, hits, validator
 # to add class decorator
 # can you make this genral
+
+# don't override cproperty when classdecorator is used
+
+
+
+# tests
+	# check if async dec working with classdecorator
+	# combin args and kwargs from classdecorator and existing cproperty on the class
