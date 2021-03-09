@@ -134,7 +134,7 @@ class cproperty:
 			return self._check_hits()
 		if self.timeout:
 			return self._check_timeout()
-
+		return True # if not pram is setted
 		# return False if the cache is expired else return True
 	def _check_hits(self):
 		self.storage[self.cache_key]['hits'] -= 1
@@ -152,12 +152,14 @@ class cproperty:
 		value = self._compute_value(instance)
 		if not self.cache_valid:
 			self._invade_cache()
-
 		return value
 
 	@thread_safe
 	@check_storage
 	def __set__(self, instance, value):
+		if self.validator and not self.validator(value):
+			raise ValueError('value is not valid, check validator')
+		self._invade_cache()
 		self.storage[self.cache_key]['value'] = AwaitableValue(value) if asyncio.iscoroutinefunction(self.method) else value
 
 	@thread_safe
@@ -166,7 +168,22 @@ class cproperty:
 		self.storage.pop(self.cache_key, None)
 
 class CacheManager:
-	print(cproperty._fields)
 	__slots__ = cproperty._fields
-	def __init__(self, *args, **kwargs):
-		pass
+	def __init__(self, general, timeout, hits, validator):
+		self.general = general
+		self.timeout = timeout
+		self.hits = hits
+		self.validator = validator
+
+# rename validator to settr
+
+# add on disk cache
+# cache functions
+# change name
+# logging
+# make property replace property without alias
+# fix cpropery pointing to global always
+
+# added general, timeout, hits, validator
+# to add class decorator
+# can you make this genral
